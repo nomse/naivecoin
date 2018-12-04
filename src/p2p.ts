@@ -8,6 +8,8 @@ import {Interaction} from './interaction';
 import {getInteractionPool} from './interactionPool';
 import {Transaction} from './transaction';
 import {getTransactionPool} from './transactionPool';
+import {Miner} from './miner';
+import {Agent} from './agent';
 
 const sockets: WebSocket[] = [];
 
@@ -208,7 +210,7 @@ const broadcastLatest = (): void => {
     broadcast(responseLatestMsg());
 };
 
-const connectToPeers = (newPeer: string): void => {
+const connectToPeers = (newPeer: string, newPubkey: string, aAgent: Agent): void => {
     const ws: WebSocket = new WebSocket(newPeer);
     ws.on('open', () => {
         initConnection(ws);
@@ -216,6 +218,13 @@ const connectToPeers = (newPeer: string): void => {
     ws.on('error', () => {
         console.log('connection failed');
     });
+
+    //实例化新的矿工
+    const newMiner: Miner = new Miner(newPubkey,100,100);
+
+    aAgent.minerCollector[aAgent.indexMiner]=newMiner;
+    aAgent.indexMiner++;
+
 };
 
 const broadCastTransactionPool = () => {

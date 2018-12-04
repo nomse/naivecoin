@@ -27,8 +27,6 @@ import {addToInteractionPool, getInteractionPool} from "./interactionPool";
  * -----------------------------------------------
  * 用户访问DAPP产生的用户数据
  * InteractionData
- *
- *
  */
 
 class Block {

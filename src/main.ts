@@ -10,8 +10,15 @@ import {UnspentTxOut} from './transaction';
 import {getTransactionPool} from './transactionPool';
 import {getPublicFromWallet, initWallet} from './wallet';
 
+import {Agent} from './agent';
+import {Miner} from './miner';
+import {Task} from './task';
+import {sendTasktoAgent} from './serviceProvider';
 const httpPort: number = parseInt(process.env.HTTP_PORT) || 3001;
 const p2pPort: number = parseInt(process.env.P2P_PORT) || 6001;
+const MinerCollector : Miner[]=[];
+const TaskCollector : Task[]=[];
+const agent: Agent = new Agent(MinerCollector,TaskCollector)
 
 const initHttpServer = (myHttpPort: number) => {
     const app = express();
@@ -121,9 +128,15 @@ const initHttpServer = (myHttpPort: number) => {
     app.get('/peers', (req, res) => {
         res.send(getSockets().map((s: any) => s._socket.remoteAddress + ':' + s._socket.remotePort));
     });
+
     app.post('/addPeer', (req, res) => {
-        connectToPeers(req.body.peer);
+        connectToPeers(req.body.peer,req.body.pubkey,agent);
         res.send();
+    });
+
+    app.get('/publishTask', (req, res) => {
+        const address: string = getPublicFromWallet();
+        sendTasktoAgent(req.body.name, address, req.body.computePower, req.body.price, agent);
     });
 
     app.post('/stop', (req, res) => {
