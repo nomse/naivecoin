@@ -10,8 +10,10 @@ class ServiceProvider {
 const sendTasktoAgent = (id: string, serviceProvider: string
     , computePower: number, price: number, agent: Agent) => {
     const newTask: Task = new Task(id, serviceProvider, computePower, price);
-    agent.taskCollector[agent.indexTask]=newTask;
     agent.indexTask++;
+    agent.taskCollector[agent.indexTask]=newTask;
+
+    console.log(agent);
     schedulerTasks(agent);
 };
 

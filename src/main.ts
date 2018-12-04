@@ -142,9 +142,9 @@ const initHttpServer = (myHttpPort: number) => {
     });
 
     // 发布任务
-    app.get('/publishTask', (req, res) => {
+    app.post('/publishTask', (req, res) => {
         const address: string = getPublicFromWallet();
-        sendTasktoAgent(req.body.name, address, req.body.computePower, req.body.c, agent);
+        sendTasktoAgent(req.body.name, address, parseInt(req.body.computePower), parseInt(req.body.price), agent);
     });
 
     app.post('/stop', (req, res) => {

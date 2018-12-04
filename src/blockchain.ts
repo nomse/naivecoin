@@ -274,7 +274,6 @@ const isValidChain = (blockchainToValidate: Block[]): UnspentTxOut[] => {
     const isValidGenesis = (block: Block): boolean => {
         return JSON.stringify(block) === JSON.stringify(genesisBlock);
     };
-
     if (!isValidGenesis(blockchainToValidate[0])) {
         return null;
     }
@@ -325,7 +324,9 @@ const addBlockToChain = (newBlock: Block): boolean => {
 
 const replaceChain = (newBlocks: Block[]) => {
     const aUnspentTxOuts = isValidChain(newBlocks);
+    console.log(aUnspentTxOuts);
     const validChain: boolean = aUnspentTxOuts !== null;
+    console.log(validChain);
     if (validChain &&
         getAccumulatedDifficulty(newBlocks) > getAccumulatedDifficulty(getBlockchain())) {
         console.log('Received blockchain is valid. Replacing current blockchain with received blockchain');

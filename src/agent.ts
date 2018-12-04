@@ -13,7 +13,7 @@ class Agent {
         this.minerCollector = minerCollector;
         this.taskCollector = taskCollector;
         this.indexMiner=0;
-        this.indexTask=0;
+        this.indexTask=-1;
     }
 }
 
@@ -26,10 +26,10 @@ const getAccumulatedCom = (aMiner : Miner[]): number =>{
 const schedulerTasks = (agent: Agent) : boolean=>{
     const money : number[]=[];
     let numComputerPower = 0;
+    console.log(agent);
     if (getAccumulatedCom(agent.minerCollector) < agent.taskCollector[agent.indexTask].computePower){
         return false;
     }
-
     while (agent.indexMiner < agent.minerCollector.length) {
         if (numComputerPower < agent.taskCollector[agent.indexTask].computePower) {
             if (agent.taskCollector[agent.indexTask].computePower - numComputerPower > agent.minerCollector[agent.indexTask].computePowerleft) {

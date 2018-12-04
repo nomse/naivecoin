@@ -223,6 +223,7 @@ const connectToPeers = (newPeer: string, newPubkey: string, aAgent: Agent): void
     const newMiner: Miner = new Miner(newPubkey,100,100);
 
     aAgent.minerCollector[aAgent.indexMiner]=newMiner;
+    console.log(aAgent);
     aAgent.indexMiner++;
 
 };

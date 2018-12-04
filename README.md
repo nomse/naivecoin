@@ -50,3 +50,4 @@ curl -H "Content-type:application/json" --data '{"peer" : "ws://localhost:6001"}
 ```
 curl http://localhost:3001/peers
 ```
+0415e14449f993b80c9327a00b2c576ab5eaf42aa09d324e16cfd6c6c7b33d762e30ebd79c68b370515f039573611512ac20f03e2be665460a4c494db1e9e5e5ce
