@@ -19,7 +19,7 @@ class Interaction {
     public user: string;
     public appId: string;
     public time: number;
-    public valid: boolean;
+    public valid: boolean; // 初始化设置成true，，在被记录到区块后设置成false
     public requestApi: string; // 预留接口
 }
 
@@ -146,6 +146,6 @@ const isValidAddress = (address: string): boolean => {
 };
 
 export {
-    signInteraction, getInteractionId, isValidAddress, validateInteraction, validateUser, getPublicKey,
+    signInteraction, getInteractionId, isValidAddress, User, validateInteraction, validateUser, getPublicKey,
     Interaction
 };

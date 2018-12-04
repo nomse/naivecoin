@@ -2,8 +2,10 @@ import * as WebSocket from 'ws';
 import {Server} from 'ws';
 import {
     addBlockToChain, Block, getBlockchain, getLatestBlock, handleReceivedTransaction, isValidBlockStructure,
-    replaceChain
+    replaceChain, handleReceivedInteraction
 } from './blockchain';
+import {Interaction} from './interaction';
+import {getInteractionPool} from './interactionPool';
 import {Transaction} from './transaction';
 import {getTransactionPool} from './transactionPool';
 
@@ -14,7 +16,9 @@ enum MessageType {
     QUERY_ALL = 1,
     RESPONSE_BLOCKCHAIN = 2,
     QUERY_TRANSACTION_POOL = 3,
-    RESPONSE_TRANSACTION_POOL = 4
+    RESPONSE_TRANSACTION_POOL = 4,
+    QUERY_INTERACTION_POOL = 5,
+    RESPONSE_INTERACTION_POOL = 6
 }
 
 class Message {
@@ -98,6 +102,26 @@ const initMessageHandler = (ws: WebSocket) => {
                         }
                     });
                     break;
+                case MessageType.QUERY_INTERACTION_POOL:
+                    write(ws, responseInteractionPoolMsg());
+                    break;
+                case MessageType.RESPONSE_INTERACTION_POOL:
+                    const receivedInteractions: Interaction[] = JSONToObject<Interaction[]>(message.data);
+                    if (receivedInteractions === null) {
+                        console.log('invalid interaction received: %s', JSON.stringify(message.data));
+                        break;
+                    }
+                    receivedInteractions.forEach((interaction: Interaction) => {
+                        try {
+                            handleReceivedInteraction(interaction);
+                            // if no error is thrown, transaction was indeed added to the pool
+                            // let's broadcast transaction pool
+                            broadCastInteractionPool();
+                        } catch (e) {
+                            console.log(e.message);
+                        }
+                    });
+                    break;
             }
         } catch (e) {
             console.log(e);
@@ -129,6 +153,16 @@ const queryTransactionPoolMsg = (): Message => ({
 const responseTransactionPoolMsg = (): Message => ({
     'type': MessageType.RESPONSE_TRANSACTION_POOL,
     'data': JSON.stringify(getTransactionPool())
+});
+
+const queryInteractionPoolMsg = (): Message => ({
+    'type': MessageType.QUERY_INTERACTION_POOL,
+    'data': null
+});
+
+const responseInteractionPoolMsg = (): Message => ({
+    'type': MessageType.RESPONSE_INTERACTION_POOL,
+    'data': JSON.stringify(getInteractionPool())
 });
 
 const initErrorHandler = (ws: WebSocket) => {
@@ -186,6 +220,9 @@ const connectToPeers = (newPeer: string): void => {
 
 const broadCastTransactionPool = () => {
     broadcast(responseTransactionPoolMsg());
+};
+const broadCastInteractionPool = () => {
+    broadcast(responseInteractionPoolMsg());
 };
 
 export {connectToPeers, broadcastLatest, broadCastTransactionPool, initP2PServer, getSockets};

@@ -54,18 +54,18 @@ const initHttpServer = (myHttpPort: number) => {
         res.send(getMyUnspentTransactionOutputs());
     });
 
-    app.post('/mineRawBlock', (req, res) => {
-        if (req.body.data == null) {
-            res.send('data parameter is missing');
-            return;
-        }
-        const newBlock: Block = generateRawNextBlock(req.body.data);
-        if (newBlock === null) {
-            res.status(400).send('could not generate block');
-        } else {
-            res.send(newBlock);
-        }
-    });
+    // app.post('/mineRawBlock', (req, res) => {
+    //     if (req.body.data == null) {
+    //         res.send('data parameter is missing');
+    //         return;
+    //     }
+    //     const newBlock: Block = generateRawNextBlock(req.body.data);
+    //     if (newBlock === null) {
+    //         res.status(400).send('could not generate block');
+    //     } else {
+    //         res.send(newBlock);
+    //     }
+    // });
 
     app.post('/mineBlock', (req, res) => {
         const newBlock: Block = generateNextBlock();

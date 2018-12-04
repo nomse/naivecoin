@@ -1,47 +1,86 @@
 import * as CryptoJS from 'crypto-js';
 import * as _ from 'lodash';
 import {broadcastLatest, broadCastTransactionPool} from './p2p';
+import {Interaction} from './interaction';
+import {updateInteractionPool} from './interactionPool';
 import {
     getCoinbaseTransaction, isValidAddress, processTransactions, Transaction, UnspentTxOut
 } from './transaction';
 import {addToTransactionPool, getTransactionPool, updateTransactionPool} from './transactionPool';
 import {hexToBinary} from './util';
 import {createTransaction, findUnspentTxOuts, getBalance, getPrivateFromWallet, getPublicFromWallet} from './wallet';
+import {addToInteractionPool, getInteractionPool} from "./interactionPool";
+
+/**
+ * 区块结构
+ * 区块头
+ * index        //区块索引
+ * hash         //全体数据的哈希
+ * previousHash
+ * timestamp
+ * pouw_proof   //从矿工那获取
+ * -----------------------------------------------
+ * 交易
+ * coinbase
+ * serviceprovider<— —>miner
+ * （后续再有可以加一些用户购买VIP服务之类）
+ * -----------------------------------------------
+ * 用户访问DAPP产生的用户数据
+ * InteractionData
+ *
+ *
+ */
 
 class Block {
-
+    /*区块头*/
     public index: number;
     public hash: string;
     public previousHash: string;
     public timestamp: number;
-    public data: Transaction[];
+    public pouw_proof: string;
     public difficulty: number;
     public nonce: number;
 
-    constructor(index: number, hash: string, previousHash: string,
-                timestamp: number, data: Transaction[], difficulty: number, nonce: number) {
+    /*交易*/
+    public data: Transaction[];
+    /*用户访问DAPP产生的用户数据*/
+    public interactionData: Interaction[];
+
+
+    constructor(index: number, hash: string, previousHash: string, timestamp: number, pouw_proof: string,
+                data: Transaction[], InteractionData: Interaction[], difficulty: number, nonce: number) {
         this.index = index;
+        this.hash = hash;
         this.previousHash = previousHash;
         this.timestamp = timestamp;
+        this.pouw_proof = pouw_proof;
         this.data = data;
-        this.hash = hash;
+        this.interactionData = InteractionData;
         this.difficulty = difficulty;
         this.nonce = nonce;
     }
 }
 
+//TODO:创世交易和创世区块
+
+//创世交易填写的是service_provider的公钥地址
 const genesisTransaction = {
     'txIns': [{'signature': '', 'txOutId': '', 'txOutIndex': 0}],
     'txOuts': [{
-        'address': '04bfcab8722991ae774db48f934ca79cfb7dd991229153b9f732ba5334aafcd8e7266e47076996b55a14bf9913ee3145ce0cfc1372ada8ada74bd287450313534a',
+        //        'address': '04bfcab8722991ae774db48f934ca79cfb7dd991229153b9f732ba5334aafcd8e7266e47076996b55a14bf9913ee3145ce0cfc1372ada8ada74bd287450313534a',
+        'address': '0484c132d3c4b34114899e1e212e7677800ef06cd9eda1c02ece37047fa7e536356a115fa120ed9b2a10a9ea3187edb6c208f8dab9a91719a1dc7e27639d3806e4',  //sjc提供公钥
         'amount': 50
     }],
     'id': 'e655f6a5f26dc9b4cac6e46f52336428287759cf81ef5ff10854f69d68f43fa3'
 };
-
+const genesisInteraction = null;
+const getCurrentTimestamp = (): number => Math.round(new Date().getTime() / 1000);
+//(null,null,null,0,false,null);
 const genesisBlock: Block = new Block(
-    0, '91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627', '', 1465154705, [genesisTransaction], 0, 0
+    /*index, hash,                                                          prehash,timestamp,pouw_proof,         data(Transaction), InteractionData*/
+    0, '91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627', '', getCurrentTimestamp(), '', [genesisTransaction], [genesisInteraction], 0, 0
 );
+
 
 let blockchain: Block[] = [genesisBlock];
 
@@ -88,14 +127,13 @@ const getAdjustedDifficulty = (latestBlock: Block, aBlockchain: Block[]) => {
     }
 };
 
-const getCurrentTimestamp = (): number => Math.round(new Date().getTime() / 1000);
-
-const generateRawNextBlock = (blockData: Transaction[]) => {
+const generateRawNextBlock = (blockData: Transaction[], interData: Interaction[]) => {
     const previousBlock: Block = getLatestBlock();
     const difficulty: number = getDifficulty(getBlockchain());
     const nextIndex: number = previousBlock.index + 1;
     const nextTimestamp: number = getCurrentTimestamp();
-    const newBlock: Block = findBlock(nextIndex, previousBlock.hash, nextTimestamp, blockData, difficulty);
+    const pouw: string = getPouw();
+    const newBlock: Block = findBlock(nextIndex, previousBlock.hash, nextTimestamp, pouw , blockData, interData, difficulty);
     if (addBlockToChain(newBlock)) {
         broadcastLatest();
         return newBlock;
@@ -105,6 +143,11 @@ const generateRawNextBlock = (blockData: Transaction[]) => {
 
 };
 
+//TODO getPouw
+const getPouw = ():string => {
+    return "";
+}
+
 // gets the unspent transaction outputs owned by the wallet
 const getMyUnspentTransactionOutputs = () => {
     return findUnspentTxOuts(getPublicFromWallet(), getUnspentTxOuts());
@@ -113,7 +156,8 @@ const getMyUnspentTransactionOutputs = () => {
 const generateNextBlock = () => {
     const coinbaseTx: Transaction = getCoinbaseTransaction(getPublicFromWallet(), getLatestBlock().index + 1);
     const blockData: Transaction[] = [coinbaseTx].concat(getTransactionPool());
-    return generateRawNextBlock(blockData);
+    const interData: Interaction[] = getInteractionPool();
+    return generateRawNextBlock(blockData,interData);
 };
 
 const generatenextBlockWithTransaction = (receiverAddress: string, amount: number) => {
@@ -126,15 +170,16 @@ const generatenextBlockWithTransaction = (receiverAddress: string, amount: numbe
     const coinbaseTx: Transaction = getCoinbaseTransaction(getPublicFromWallet(), getLatestBlock().index + 1);
     const tx: Transaction = createTransaction(receiverAddress, amount, getPrivateFromWallet(), getUnspentTxOuts(), getTransactionPool());
     const blockData: Transaction[] = [coinbaseTx, tx];
-    return generateRawNextBlock(blockData);
+    const interData: Interaction[] = getInteractionPool();
+    return generateRawNextBlock(blockData,interData);
 };
 
-const findBlock = (index: number, previousHash: string, timestamp: number, data: Transaction[], difficulty: number): Block => {
+const findBlock = (index: number, previousHash: string, timestamp: number, pouw:string, data: Transaction[], interactionData: Interaction[], difficulty: number): Block => {
     let nonce = 0;
     while (true) {
-        const hash: string = calculateHash(index, previousHash, timestamp, data, difficulty, nonce);
+        const hash: string = calculateHash(index, previousHash, timestamp, pouw, data, interactionData, difficulty, nonce);
         if (hashMatchesDifficulty(hash, difficulty)) {
-            return new Block(index, hash, previousHash, timestamp, data, difficulty, nonce);
+            return new Block(index, hash, previousHash, timestamp, pouw, data, interactionData, difficulty, nonce);
         }
         nonce++;
     }
@@ -152,11 +197,11 @@ const sendTransaction = (address: string, amount: number): Transaction => {
 };
 
 const calculateHashForBlock = (block: Block): string =>
-    calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.difficulty, block.nonce);
+    calculateHash(block.index, block.previousHash, block.timestamp, block.pouw_proof, block.data, block.interactionData, block.difficulty, block.nonce);
 
-const calculateHash = (index: number, previousHash: string, timestamp: number, data: Transaction[],
+const calculateHash = (index: number, previousHash: string, timestamp: number, pouw: string, data: Transaction[], interactionData: Interaction[],
                        difficulty: number, nonce: number): string =>
-    CryptoJS.SHA256(index + previousHash + timestamp + data + difficulty + nonce).toString();
+    CryptoJS.SHA256(index + previousHash + timestamp + pouw + data + interactionData + difficulty + nonce).toString();
 
 const isValidBlockStructure = (block: Block): boolean => {
     return typeof block.index === 'number'
@@ -259,6 +304,13 @@ const isValidChain = (blockchainToValidate: Block[]): UnspentTxOut[] => {
 const addBlockToChain = (newBlock: Block): boolean => {
     if (isValidNewBlock(newBlock, getLatestBlock())) {
         const retVal: UnspentTxOut[] = processTransactions(newBlock.data, getUnspentTxOuts(), newBlock.index);
+        newBlock.interactionData.forEach((interaction: Interaction) => {
+            try {
+                interaction.valid = false;
+            } catch (e) {
+                console.log(e.message);
+            }
+        });
         if (retVal === null) {
             console.log('block is not valid in terms of transactions');
             return false;
@@ -266,6 +318,7 @@ const addBlockToChain = (newBlock: Block): boolean => {
             blockchain.push(newBlock);
             setUnspentTxOuts(retVal);
             updateTransactionPool(unspentTxOuts);
+            updateInteractionPool();
             return true;
         }
     }
@@ -281,6 +334,7 @@ const replaceChain = (newBlocks: Block[]) => {
         blockchain = newBlocks;
         setUnspentTxOuts(aUnspentTxOuts);
         updateTransactionPool(unspentTxOuts);
+        updateInteractionPool();
         broadcastLatest();
     } else {
         console.log('Received blockchain invalid');
@@ -290,10 +344,13 @@ const replaceChain = (newBlocks: Block[]) => {
 const handleReceivedTransaction = (transaction: Transaction) => {
     addToTransactionPool(transaction, getUnspentTxOuts());
 };
+const handleReceivedInteraction = (interaction: Interaction) => {
+    addToInteractionPool(interaction);
+};
 
 export {
     Block, getBlockchain, getUnspentTxOuts, getLatestBlock, sendTransaction,
     generateRawNextBlock, generateNextBlock, generatenextBlockWithTransaction,
     handleReceivedTransaction, getMyUnspentTransactionOutputs,
-    getAccountBalance, isValidBlockStructure, replaceChain, addBlockToChain
+    getAccountBalance, isValidBlockStructure, replaceChain, addBlockToChain, handleReceivedInteraction
 };
