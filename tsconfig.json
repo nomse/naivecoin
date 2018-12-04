@@ -11,7 +11,9 @@
     "src/util.ts",
     "src/transaction.ts",
     "src/wallet.ts",
-    "src/transactionPool.ts"
+    "src/transactionPool.ts",
+    "src/interaction.ts",
+    "src/interactionPool.ts"
   ],
   "exclude": [
     "node_modules"
