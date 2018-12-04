@@ -1,8 +1,9 @@
 import * as CryptoJS from 'crypto-js';
 import * as ecdsa from 'elliptic';
 import * as _ from 'lodash';
-
 const ec = new ecdsa.ec('secp256k1');
+import {Agent} from './agent';
+import {addToInteractionPool} from "./interactionPool";
 
 class User {
     public publicKey: string;
@@ -21,10 +22,37 @@ class Interaction {
     public time: number;
     public valid: boolean; // 初始化设置成true，，在被记录到区块后设置成false
     public requestApi: string; // 预留接口
+
+    constructor(id: string, user: string, appId: string, time: number, valid: boolean, requestApi: string){
+        this.id = id;
+        this.user = user;
+        this.appId = appId;
+        this.time = time;
+        this.valid = valid;
+        this.requestApi = requestApi;
+    }
 }
 
 const getInteractionId = (interaction: Interaction): string => {
     return CryptoJS.SHA256(interaction.appId + interaction.time + interaction.requestApi).toString();
+};
+
+const getCurrentTimestamp = (): number => Math.round(new Date().getTime() / 1000);
+
+const signInteraction = (interaction: Interaction, user: User): string => { // 在产生交互的时候生成签名
+    const dataToSign = interaction.id;
+    const key = ec.keyFromPrivate(user.privateKey, 'hex');
+    const signature: string = toHexString(key.sign(dataToSign).toDER());
+    return signature;
+};
+
+const generateInteraction = (taskId: string) => {
+    const keyPair = ec.genKeyPair();
+    const user: User = new User(keyPair.getPrivate(), keyPair.getPublicKey());
+    const interaction: Interaction = new Interaction( "", "", taskId, getCurrentTimestamp(), true, "/getApi");
+    interaction.id =  getInteractionId(interaction);
+    interaction.user = signInteraction(interaction, user);
+    addToInteractionPool(interaction);
 };
 
 const validateInteraction = (interaction: Interaction): boolean => {
@@ -42,13 +70,6 @@ const validateInteraction = (interaction: Interaction): boolean => {
         return false;
     }
     return true;
-};
-
-const signInteraction = (interaction: Interaction, user: User): string => { // 在产生交互的时候生成签名
-    const dataToSign = interaction.id;
-    const key = ec.keyFromPrivate(user.privateKey, 'hex');
-    const signature: string = toHexString(key.sign(dataToSign).toDER());
-    return signature;
 };
 
 const validateUser = (interaction: Interaction, user: User): boolean => {
@@ -147,5 +168,5 @@ const isValidAddress = (address: string): boolean => {
 
 export {
     signInteraction, getInteractionId, isValidAddress, User, validateInteraction, validateUser, getPublicKey,
-    Interaction
+    Interaction, generateInteraction
 };

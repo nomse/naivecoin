@@ -65,8 +65,8 @@ class Block {
 const genesisTransaction = {
     'txIns': [{'signature': '', 'txOutId': '', 'txOutIndex': 0}],
     'txOuts': [{
-        //        'address': '04bfcab8722991ae774db48f934ca79cfb7dd991229153b9f732ba5334aafcd8e7266e47076996b55a14bf9913ee3145ce0cfc1372ada8ada74bd287450313534a',
-        'address': '0484c132d3c4b34114899e1e212e7677800ef06cd9eda1c02ece37047fa7e536356a115fa120ed9b2a10a9ea3187edb6c208f8dab9a91719a1dc7e27639d3806e4',  //sjc提供公钥
+        'address': '04bfcab8722991ae774db48f934ca79cfb7dd991229153b9f732ba5334aafcd8e7266e47076996b55a14bf9913ee3145ce0cfc1372ada8ada74bd287450313534a',
+        // 'address': '0484c132d3c4b34114899e1e212e7677800ef06cd9eda1c02ece37047fa7e536356a115fa120ed9b2a10a9ea3187edb6c208f8dab9a91719a1dc7e27639d3806e4',  //sjc提供公钥
         'amount': 50
     }],
     'id': 'e655f6a5f26dc9b4cac6e46f52336428287759cf81ef5ff10854f69d68f43fa3'

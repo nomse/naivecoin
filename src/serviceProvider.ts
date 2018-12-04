@@ -1,5 +1,5 @@
 import {Task} from './task';
-import {Agent} from './agent';
+import {Agent,schedulerTasks} from './agent';
 class ServiceProvider {
     public svcPubkey: string;
     constructor(svcPubkey: string) {
@@ -12,6 +12,7 @@ const sendTasktoAgent = (id: string, serviceProvider: string
     const newTask: Task = new Task(id, serviceProvider, computePower, price);
     agent.taskCollector[agent.indexTask]=newTask;
     agent.indexTask++;
+    schedulerTasks(agent);
 };
 
 export {sendTasktoAgent}

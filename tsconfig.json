@@ -13,7 +13,11 @@
     "src/wallet.ts",
     "src/transactionPool.ts",
     "src/interaction.ts",
-    "src/interactionPool.ts"
+    "src/interactionPool.ts",
+    "src/agent.ts",
+    "src/miner.ts",
+    "src/serviceProvider.ts",
+    "src/task.ts"
   ],
   "exclude": [
     "node_modules"

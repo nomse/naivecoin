@@ -1,5 +1,6 @@
 import {Miner} from './miner';
 import {Task} from './task';
+import {sendTransaction} from "./blockchain";
 
 class Agent {
 
@@ -34,12 +35,14 @@ const schedulerTasks = (agent: Agent) : boolean=>{
             if (agent.taskCollector[agent.indexTask].computePower - numComputerPower > agent.minerCollector[agent.indexTask].computePowerleft) {
                 numComputerPower = numComputerPower + agent.minerCollector[agent.indexMiner].computePowerleft;
                 money[agent.indexMiner] = agent.taskCollector[agent.indexTask].price * agent.minerCollector[agent.indexMiner].computePowerleft / agent.taskCollector[agent.indexTask].computePower;
+                sendTransaction(agent.minerCollector[agent.indexMiner].Pk, money[agent.indexMiner]);
             }
             else {
                 agent.minerCollector[agent.indexTask].computePowerleft = agent.minerCollector[agent.indexTask].computePowerleft + numComputerPower - agent.taskCollector[agent.indexTask].computePower;
                 let cost = agent.taskCollector[agent.indexTask].computePower - numComputerPower;
                 numComputerPower = agent.taskCollector[agent.indexTask].computePower;
                 money[agent.indexMiner] = agent.taskCollector [agent.indexTask].price * cost / agent.taskCollector[agent.indexTask].computePower;
+                sendTransaction(agent.minerCollector[agent.indexMiner].Pk, money[agent.indexMiner]);
             }
         }
         else {
@@ -50,4 +53,4 @@ const schedulerTasks = (agent: Agent) : boolean=>{
 
 }
 
- export {Agent};
+export {Agent, schedulerTasks};

@@ -8,12 +8,14 @@ import {
 import {connectToPeers, getSockets, initP2PServer} from './p2p';
 import {UnspentTxOut} from './transaction';
 import {getTransactionPool} from './transactionPool';
+import {addToInteractionPool} from './interactionPool';
 import {getPublicFromWallet, initWallet} from './wallet';
-
 import {Agent} from './agent';
 import {Miner} from './miner';
 import {Task} from './task';
 import {sendTasktoAgent} from './serviceProvider';
+import {generateInteraction} from "./interaction";
+
 const httpPort: number = parseInt(process.env.HTTP_PORT) || 3001;
 const p2pPort: number = parseInt(process.env.P2P_PORT) || 6001;
 const MinerCollector : Miner[]=[];
@@ -37,6 +39,11 @@ const initHttpServer = (myHttpPort: number) => {
     app.get('/block/:hash', (req, res) => {
         const block = _.find(getBlockchain(), {'hash' : req.params.hash});
         res.send(block);
+    });
+
+    // 生成交互信息
+    app.post("/generateInteraction/:taskId",(req, res) => {
+        generateInteraction(req.params.taskId);
     });
 
     app.get('/transaction/:id', (req, res) => {
@@ -134,9 +141,10 @@ const initHttpServer = (myHttpPort: number) => {
         res.send();
     });
 
+    // 发布任务
     app.get('/publishTask', (req, res) => {
         const address: string = getPublicFromWallet();
-        sendTasktoAgent(req.body.name, address, req.body.computePower, req.body.price, agent);
+        sendTasktoAgent(req.body.name, address, req.body.computePower, req.body.c, agent);
     });
 
     app.post('/stop', (req, res) => {
