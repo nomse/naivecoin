@@ -4,7 +4,7 @@ import {Interaction, validateInteraction, getInteractionId} from './Interaction'
 let interactionPool: Interaction[] = [];
 
 const getInteractionPool = () => {
-    return _.cloneDeep(interactionPool);
+    return interactionPool;
 };
 
 const addToInteractionPool = (ix: Interaction) => {
@@ -18,7 +18,7 @@ const addToInteractionPool = (ix: Interaction) => {
     interactionPool.push(ix);
 };
 
-const updateInteractionPool = (aInteractions: Interaction[]) => {
+const updateInteractionPool = () => {
     const invalidInteractions = [];
     for (const ix of interactionPool) {
             if (!ix.valid) {
@@ -26,10 +26,9 @@ const updateInteractionPool = (aInteractions: Interaction[]) => {
             }
             console.log(ix);
     }
-    if (invalidInteractions.length > 0||aInteractions.length>0) {
+    if (invalidInteractions.length > 0) {
         console.log('removing the following interaction from ixPool: %s', JSON.stringify(invalidInteractions));
         interactionPool = _.without(interactionPool, ...invalidInteractions);
-        interactionPool = _.without(interactionPool, ...aInteractions);
     }
 };
 

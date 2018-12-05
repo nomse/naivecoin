@@ -308,7 +308,7 @@ const isValidChain = (blockchainToValidate: Block[]): UnspentTxOut[] => {
 const addBlockToChain = (newBlock: Block): boolean => {
     if (isValidNewBlock(newBlock, getLatestBlock())) {
         const retVal: UnspentTxOut[] = processTransactions(newBlock.data, getUnspentTxOuts(), newBlock.index);
-        newBlock.interactionData.forEach((interaction: Interaction) => {
+        getInteractionPool().forEach((interaction: Interaction) => {
             try {
                 interaction.valid = false;
             } catch (e) {
@@ -322,7 +322,7 @@ const addBlockToChain = (newBlock: Block): boolean => {
             blockchain.push(newBlock);
             setUnspentTxOuts(retVal);
             updateTransactionPool(unspentTxOuts);
-            updateInteractionPool(newBlock.interactionData);
+            updateInteractionPool();
             return true;
         }
     }
@@ -340,7 +340,7 @@ const replaceChain = (newBlocks: Block[]) => {
         blockchain = newBlocks;
         setUnspentTxOuts(aUnspentTxOuts);
         updateTransactionPool(unspentTxOuts);
-        updateInteractionPool([]);
+        updateInteractionPool();
         broadcastLatest();
     } else {
         console.log('Received blockchain invalid');
