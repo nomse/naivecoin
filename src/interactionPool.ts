@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import {Interaction, validateInteraction} from './Interaction';
+import {Interaction, validateInteraction, getInteractionId} from './Interaction';
 
 let interactionPool: Interaction[] = [];
 
@@ -11,9 +11,9 @@ const addToInteractionPool = (ix: Interaction) => {
     if (!validateInteraction(ix)) {
         throw Error('Trying to add invalid tx to pool');
     }
-    // if (!isValidIxForPool(ix, interactionPool)) {
-    //     throw Error('Trying to add invalid tx to pool');
-    // }
+    if (!isValidIxForPool(ix, interactionPool)) {
+        throw Error('Trying to add invalid tx to pool');
+    }
     console.log('adding to ixPool: %s', JSON.stringify(ix));
     interactionPool.push(ix);
 };
@@ -33,8 +33,14 @@ const updateInteractionPool = () => {
     }
 };
 
-// const isValidIxForPool = (ix: Interaction, aInteractionPool: Interaction[]): boolean => {
-//     return true;
-// };
+
+const isValidIxForPool = (ix: Interaction, aInteractionPool: Interaction[]): boolean => {
+    for(let i=0 ; i < aInteractionPool.length; i++){
+        if(getInteractionId(aInteractionPool[i]) === getInteractionId(ix)){
+           return false;
+        }
+    }
+    return true;
+};
 
 export {addToInteractionPool, getInteractionPool, updateInteractionPool};
