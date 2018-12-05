@@ -18,7 +18,7 @@ const addToInteractionPool = (ix: Interaction) => {
     interactionPool.push(ix);
 };
 
-const updateInteractionPool = () => {
+const updateInteractionPool = (aInteractions: Interaction[]) => {
     const invalidInteractions = [];
     for (const ix of interactionPool) {
             if (!ix.valid) {
@@ -26,9 +26,10 @@ const updateInteractionPool = () => {
             }
             console.log(ix);
     }
-    if (invalidInteractions.length > 0) {
+    if (invalidInteractions.length > 0||aInteractions.length>0) {
         console.log('removing the following interaction from ixPool: %s', JSON.stringify(invalidInteractions));
         interactionPool = _.without(interactionPool, ...invalidInteractions);
+        interactionPool = _.without(interactionPool, ...aInteractions);
     }
 };
 
