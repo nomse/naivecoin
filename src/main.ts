@@ -144,7 +144,8 @@ const initHttpServer = (myHttpPort: number) => {
     // 发布任务
     app.post('/publishTask', (req, res) => {
         const address: string = getPublicFromWallet();
-        sendTasktoAgent(req.body.name, address, parseInt(req.body.computePower), parseInt(req.body.price), agent);
+        const resp: boolean= sendTasktoAgent(req.body.name, address, parseInt(req.body.computePower), parseInt(req.body.price), agent);
+        res.send(resp);
     });
 
     app.post('/stop', (req, res) => {

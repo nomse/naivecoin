@@ -184,6 +184,7 @@ const findBlock = (index: number, previousHash: string, timestamp: number, pouw:
 };
 
 const getAccountBalance = (): number => {
+    Math.random()
     return getBalance(getPublicFromWallet(), getUnspentTxOuts());
 };
 

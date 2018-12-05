@@ -220,7 +220,8 @@ const connectToPeers = (newPeer: string, newPubkey: string, aAgent: Agent): void
     });
 
     //实例化新的矿工
-    const newMiner: Miner = new Miner(newPubkey,100,100);
+    const powerRandom = Math.floor(Math.random()*10+1)*100;
+    const newMiner: Miner = new Miner(newPubkey, powerRandom, powerRandom);
 
     aAgent.minerCollector[aAgent.indexMiner]=newMiner;
     console.log(aAgent);

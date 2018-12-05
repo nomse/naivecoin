@@ -8,13 +8,13 @@ class ServiceProvider {
 }
 
 const sendTasktoAgent = (id: string, serviceProvider: string
-    , computePower: number, price: number, agent: Agent) => {
+    , computePower: number, price: number, agent: Agent): boolean => {
     const newTask: Task = new Task(id, serviceProvider, computePower, price);
     agent.indexTask++;
     agent.taskCollector[agent.indexTask]=newTask;
 
     console.log(agent);
-    schedulerTasks(agent);
+    return schedulerTasks(agent);
 };
 
 export {sendTasktoAgent}

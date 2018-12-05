@@ -19,36 +19,45 @@ class Agent {
 
 const getAccumulatedCom = (aMiner : Miner[]): number =>{
     return aMiner
-        .map((miner)=> miner.computePower)
+        .map((miner)=> miner.computePowerleft)
         .reduce((a,b) => a+b);
 }
 
 const schedulerTasks = (agent: Agent) : boolean=>{
-    const money : number[]=[];
+    // const money : number[]=[];
     let numComputerPower = 0;
     console.log(agent);
     if (getAccumulatedCom(agent.minerCollector) < agent.taskCollector[agent.indexTask].computePower){
         return false;
     }
-    while (agent.indexMiner < agent.minerCollector.length) {
-        if (numComputerPower < agent.taskCollector[agent.indexTask].computePower) {
-            if (agent.taskCollector[agent.indexTask].computePower - numComputerPower > agent.minerCollector[agent.indexTask].computePowerleft) {
-                numComputerPower = numComputerPower + agent.minerCollector[agent.indexMiner].computePowerleft;
-                money[agent.indexMiner] = agent.taskCollector[agent.indexTask].price * agent.minerCollector[agent.indexMiner].computePowerleft / agent.taskCollector[agent.indexTask].computePower;
-                sendTransaction(agent.minerCollector[agent.indexMiner].Pk, money[agent.indexMiner]);
-            }
-            else {
-                agent.minerCollector[agent.indexTask].computePowerleft = agent.minerCollector[agent.indexTask].computePowerleft + numComputerPower - agent.taskCollector[agent.indexTask].computePower;
-                let cost = agent.taskCollector[agent.indexTask].computePower - numComputerPower;
-                numComputerPower = agent.taskCollector[agent.indexTask].computePower;
-                money[agent.indexMiner] = agent.taskCollector [agent.indexTask].price * cost / agent.taskCollector[agent.indexTask].computePower;
-                sendTransaction(agent.minerCollector[agent.indexMiner].Pk, money[agent.indexMiner]);
-            }
-        }
-        else {
-            break;
-        }
+   /* // let index = 0;
+    // while (index < agent.minerCollector.length) {
+    //     if (numComputerPower < agent.taskCollector[agent.indexTask].computePower) {
+    //         if (agent.taskCollector[agent.indexTask].computePower - numComputerPower > agent.minerCollector[index].computePowerleft) {
+    //             numComputerPower = numComputerPower + agent.minerCollector[index].computePowerleft;
+    //             money[index] = agent.taskCollector[agent.indexTask].price * agent.minerCollector[index].computePowerleft / agent.taskCollector[agent.indexTask].computePower;
+    //             sendTransaction(agent.minerCollector[index].Pk, money[index]);
+    //         }
+    //         else {
+    //             agent.minerCollector[index].computePowerleft = agent.minerCollector[index].computePowerleft + numComputerPower - agent.taskCollector[agent.indexTask].computePower;
+    //             let cost = agent.taskCollector[agent.indexTask].computePower - numComputerPower;
+    //             numComputerPower = agent.taskCollector[agent.indexTask].computePower;
+    //             money[index] = agent.taskCollector [agent.indexTask].price * cost / agent.taskCollector[agent.indexTask].computePower;
+    //             sendTransaction(agent.minerCollector[index].Pk, money[index]);
+    //         }
+    //         index ++;
+    //     }
+    //     else {
+    //         break;
+    //     }
+    // }*/
+
+    for(let i = 0 ; i < agent.indexMiner ; i++){
+        const sumPower = getAccumulatedCom(agent.minerCollector);
+        sendTransaction(agent.minerCollector[i].Pk, agent.taskCollector[agent.indexTask].price*agent.minerCollector[i].computePowerleft/sumPower);
+        agent.minerCollector[i].computePowerleft = agent.minerCollector[i].computePowerleft - agent.minerCollector[i].computePowerleft/sumPower;
     }
+    
     return true;
 
 }

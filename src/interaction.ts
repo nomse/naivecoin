@@ -48,10 +48,11 @@ const signInteraction = (interaction: Interaction, user: User): string => { // å
 
 const generateInteraction = (taskId: string) => {
     const keyPair = ec.genKeyPair();
-    const user: User = new User(keyPair.getPrivate(), keyPair.getPublicKey());
+    const user: User = new User(keyPair.getPrivate(), getPublicKey(keyPair.getPrivate()));
     const interaction: Interaction = new Interaction( "", "", taskId, getCurrentTimestamp(), true, "/getApi");
     interaction.id =  getInteractionId(interaction);
     interaction.user = signInteraction(interaction, user);
+    console.log(interaction);
     addToInteractionPool(interaction);
 };
 
@@ -65,10 +66,10 @@ const validateInteraction = (interaction: Interaction): boolean => {
         console.log('invalid interaction id: ' + interaction.id);
         return false;
     }
-    if (validateUser) {
-        console.log('interaction is invalid : ' + interaction.id);
-        return false;
-    }
+    // if (validateUser) {
+    //     console.log('interaction is invalid : ' + interaction.id);
+    //     return false;
+    // }
     return true;
 };
 
