@@ -3,7 +3,7 @@ import * as express from 'express';
 import * as _ from 'lodash';
 import {
     Block, generateNextBlock, generatenextBlockWithTransaction, generateRawNextBlock, getAccountBalance,
-    getBlockchain, getMyUnspentTransactionOutputs, getUnspentTxOuts, sendTransaction
+    getBlockchain, getMyUnspentTransactionOutputs, getUnspentTxOuts, sendTransaction, sendInteraction
 } from './blockchain';
 import {connectToPeers, getSockets, initP2PServer} from './p2p';
 import {UnspentTxOut} from './transaction';
@@ -14,7 +14,6 @@ import {Agent} from './agent';
 import {Miner} from './miner';
 import {Task} from './task';
 import {sendTasktoAgent} from './serviceProvider';
-import {generateInteraction} from "./interaction";
 
 const httpPort: number = parseInt(process.env.HTTP_PORT) || 3001;
 const p2pPort: number = parseInt(process.env.P2P_PORT) || 6001;
@@ -43,7 +42,7 @@ const initHttpServer = (myHttpPort: number) => {
 
     // 生成交互信息
     app.post("/generateInteraction/:taskId",(req, res) => {
-        generateInteraction(req.params.taskId);
+        sendInteraction(req.params.taskId);
     });
 
     app.get('/transaction/:id', (req, res) => {

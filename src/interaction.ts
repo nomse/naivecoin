@@ -4,7 +4,6 @@ import * as _ from 'lodash';
 const ec = new ecdsa.ec('secp256k1');
 import {Agent} from './agent';
 import {addToInteractionPool} from "./interactionPool";
-import {broadCastInteractionPool} from "./p2p";
 
 class User {
     public publicKey: string;
@@ -47,7 +46,7 @@ const signInteraction = (interaction: Interaction, user: User): string => { // å
     return signature;
 };
 
-const generateInteraction = (taskId: string) => {
+const generateInteraction = (taskId: string) : Interaction => {
     const keyPair = ec.genKeyPair();
     const user: User = new User(keyPair.getPrivate(), getPublicKey(keyPair.getPrivate()));
     const interaction: Interaction = new Interaction( "", "", taskId, getCurrentTimestamp(), true, "/getApi");
@@ -55,7 +54,7 @@ const generateInteraction = (taskId: string) => {
     interaction.user = signInteraction(interaction, user);
     console.log(interaction);
     addToInteractionPool(interaction);
-    broadCastInteractionPool();
+    return interaction;
 };
 
 const validateInteraction = (interaction: Interaction): boolean => {

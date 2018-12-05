@@ -1,7 +1,7 @@
 import * as CryptoJS from 'crypto-js';
 import * as _ from 'lodash';
-import {broadcastLatest, broadCastTransactionPool} from './p2p';
-import {Interaction} from './interaction';
+import {broadCastInteractionPool, broadcastLatest, broadCastTransactionPool} from './p2p';
+import {Interaction, generateInteraction} from './interaction';
 import {updateInteractionPool} from './interactionPool';
 import {
     getCoinbaseTransaction, isValidAddress, processTransactions, Transaction, UnspentTxOut
@@ -195,6 +195,12 @@ const sendTransaction = (address: string, amount: number): Transaction => {
     return tx;
 };
 
+const sendInteraction = (taskId: string): Interaction => {
+    const interaction: Interaction = generateInteraction(taskId);
+    broadCastInteractionPool();
+    return interaction;
+};
+
 const calculateHashForBlock = (block: Block): string =>
     calculateHash(block.index, block.previousHash, block.timestamp, block.pouw_proof, block.data, block.interactionData, block.difficulty, block.nonce);
 
@@ -352,5 +358,5 @@ export {
     Block, getBlockchain, getUnspentTxOuts, getLatestBlock, sendTransaction,
     generateRawNextBlock, generateNextBlock, generatenextBlockWithTransaction,
     handleReceivedTransaction, getMyUnspentTransactionOutputs,
-    getAccountBalance, isValidBlockStructure, replaceChain, addBlockToChain, handleReceivedInteraction
+    getAccountBalance, isValidBlockStructure, replaceChain, addBlockToChain, handleReceivedInteraction, sendInteraction
 };
