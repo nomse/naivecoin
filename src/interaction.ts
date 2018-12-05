@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 const ec = new ecdsa.ec('secp256k1');
 import {Agent} from './agent';
 import {addToInteractionPool} from "./interactionPool";
+import {broadCastInteractionPool} from "./p2p";
 
 class User {
     public publicKey: string;
@@ -54,6 +55,7 @@ const generateInteraction = (taskId: string) => {
     interaction.user = signInteraction(interaction, user);
     console.log(interaction);
     addToInteractionPool(interaction);
+    broadCastInteractionPool();
 };
 
 const validateInteraction = (interaction: Interaction): boolean => {

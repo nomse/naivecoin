@@ -236,4 +236,4 @@ const broadCastInteractionPool = () => {
     broadcast(responseInteractionPoolMsg());
 };
 
-export {connectToPeers, broadcastLatest, broadCastTransactionPool, initP2PServer, getSockets};
+export {connectToPeers, broadcastLatest, broadCastTransactionPool, broadCastInteractionPool, initP2PServer, getSockets};
