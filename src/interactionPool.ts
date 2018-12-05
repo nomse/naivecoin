@@ -21,14 +21,13 @@ const addToInteractionPool = (ix: Interaction) => {
 const updateInteractionPool = () => {
     const invalidInteractions = [];
     for (const ix of interactionPool) {
-
             if (!ix.valid) {
                 invalidInteractions.push(ix);
-                break;
             }
+            console.log(ix);
     }
     if (invalidInteractions.length > 0) {
-        console.log('removing the following transactions from txPool: %s', JSON.stringify(invalidInteractions));
+        console.log('removing the following interaction from ixPool: %s', JSON.stringify(invalidInteractions));
         interactionPool = _.without(interactionPool, ...invalidInteractions);
     }
 };

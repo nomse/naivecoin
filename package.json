@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "prestart": "npm run compile",
     "start": "node src/main.js",
+    "prestart": "npm run compile",
     "compile": "tsc"
   },
   "dependencies": {
