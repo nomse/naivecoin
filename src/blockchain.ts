@@ -308,7 +308,7 @@ const isValidChain = (blockchainToValidate: Block[]): UnspentTxOut[] => {
 const addBlockToChain = (newBlock: Block): boolean => {
     if (isValidNewBlock(newBlock, getLatestBlock())) {
         const retVal: UnspentTxOut[] = processTransactions(newBlock.data, getUnspentTxOuts(), newBlock.index);
-        getInteractionPool().forEach((interaction: Interaction) => {
+        newBlock.interactionData.forEach((interaction: Interaction) => {
             try {
                 interaction.valid = false;
             } catch (e) {

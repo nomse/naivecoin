@@ -8,9 +8,9 @@ import {
 import {connectToPeers, getSockets, initP2PServer} from './p2p';
 import {UnspentTxOut} from './transaction';
 import {getTransactionPool} from './transactionPool';
-import {addToInteractionPool} from './interactionPool';
+import {addToInteractionPool,getInteractionPool} from './interactionPool';
 import {getPublicFromWallet, initWallet} from './wallet';
-import {Agent} from './agent';
+import {Agent,getAllTasks,getAllMiners} from './agent';
 import {Miner} from './miner';
 import {Task} from './task';
 import {sendTasktoAgent} from './serviceProvider';
@@ -154,6 +154,17 @@ const initHttpServer = (myHttpPort: number) => {
 
     app.listen(myHttpPort, () => {
         console.log('Listening http on port: ' + myHttpPort);
+    });
+    app.get('/getAllminers', (req, res) => {
+        res.send(getAllMiners(agent));
+    });
+
+    app.get('/getAlltasks', (req, res) => {
+        res.send(getAllTasks(agent));
+    });
+
+    app.get('/interactionPool', (req, res) => {
+        res.send(getInteractionPool());
     });
 };
 

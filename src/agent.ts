@@ -1,6 +1,7 @@
 import {Miner} from './miner';
 import {Task} from './task';
 import {sendTransaction} from "./blockchain";
+import * as _ from "lodash";
 
 class Agent {
 
@@ -61,5 +62,19 @@ const schedulerTasks = (agent: Agent) : boolean=>{
     return true;
 
 }
+/**
+ * return all miners message
+ * @param agent
+ */
+const getAllMiners = (agent: Agent) =>{
+    return _.cloneDeep(agent.minerCollector);
+}
 
-export {Agent, schedulerTasks};
+/**
+ * return all tasks message
+ * @param agent
+ */
+const getAllTasks =(agent: Agent) =>{
+    return _.cloneDeep(agent.taskCollector);
+}
+export {Agent, schedulerTasks, getAllMiners, getAllTasks};
