@@ -143,7 +143,7 @@ const generateRawNextBlock = (blockData: Transaction[], interData: Interaction[]
 
 //TODO getPouw
 const getPouw = ():string => {
-    return "";
+    return CryptoJS.SHA256(getCurrentTimestamp().toString()).toString();
 }
 
 // gets the unspent transaction outputs owned by the wallet
